@@ -53,11 +53,10 @@ interface ModelOptions {
     connection: any;
 }
 export default function newModel<T>({ className, connection }: ModelOptions): {
-    new (id: number, editCommitId: number, editDate: number, notes: string): {
+    new (id: number, editCommitId: number, editDate: number): {
         id: number;
         editCommitId: number;
         editDate: number;
-        notes: string;
         only(fields: string[]): any;
         except(fields: string[]): any;
     };
@@ -98,7 +97,6 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
         id: number;
         editCommitId: number;
         editDate: number;
-        notes: string;
         only(fields: string[]): any;
         except(fields: string[]): any;
     };
