@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "outDir": "build/compiled",
+    "target": "es2018",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noEmitOnError": true,
+    "strictNullChecks": false,
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "declaration": true,
+    "declarationDir": "build/typings",
+    "esModuleInterop": false
+  },
+  "include": ["src/**/*"]
+}

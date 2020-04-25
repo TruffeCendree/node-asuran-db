@@ -1,0 +1,36 @@
+{
+  "name": "node-asuran-db",
+  "version": "0.0.1",
+  "description": "Lightweight ORM supporting revision with user action traceability for Typescript and MariaDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TruffeCendree/node-asuran-db.git"
+  },
+  "keywords": [
+    "ORM",
+    "MariaDB",
+    "MySQL",
+    "node",
+    "Typescript",
+    "revision"
+  ],
+  "author": "Thomas VEILLARD",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/TruffeCendree/node-asuran-db/issues"
+  },
+  "homepage": "https://github.com/TruffeCendree/node-asuran-db#readme",
+  "dependencies": {
+    "fp-ts": "^2.5.3",
+    "io-ts": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.5",
+    "@types/node": "^13.13.2",
+    "debug": "^4.1.1"
+  }
+}
