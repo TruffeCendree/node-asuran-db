@@ -70,11 +70,6 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
         sqlGetter: 'UNIX_TIMESTAMP(?) * 1000',
         sqlSetter: 'FROM_UNIXTIME(? DIV 1000)',
         updateBody: false
-      }),
-      DBSpecializedModel.prepareField({
-        name: 'notes',
-        type: 'varchar(512) DEFAULT NULL',
-        iotsSerializedValidator: t.union([t.null, t.string])
       })
     ]
 
@@ -98,8 +93,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
     constructor (
       public id: number,
       public editCommitId: number,
-      public editDate: number,
-      public notes: string
+      public editDate: number
     ) {}
 
     // tslint:disable-next-line:no-empty
@@ -196,8 +190,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       const obj = new Constructor(
         body[`${prefix}.id`],
         body[`${prefix}.editCommitId`],
-        body[`${prefix}.editDate`],
-        body[`${prefix}.notes`]
+        body[`${prefix}.editDate`]
       )
 
       for (const field of this.fields) {
