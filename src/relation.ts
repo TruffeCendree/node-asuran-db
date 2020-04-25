@@ -3,7 +3,7 @@ import { FieldForeignKey } from './model'
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter'
 import * as assert from 'assert'
 
-export default class ActiveRelation<T> {
+export default class Relation<T> {
   private _ioSerialized: { [key: string]: t.Type<any, any, unknown> } = {}
   private _select: string[] = []
   private _joins: { sql: string, bindings: any[] }[] = []
@@ -12,7 +12,7 @@ export default class ActiveRelation<T> {
   private _group: string
   private _limit: number
   private _order: string
-  private _proxify: { activeRelation: ActiveRelation<any>, basePath: string } = { activeRelation: null, basePath: '' }
+  private _proxify: { relation: Relation<any>, basePath: string } = { relation: null, basePath: '' }
 
   constructor (private baseModel: FieldForeignKey) {
     this.includes(this.baseModel, null, this.baseModel.className, true)
@@ -187,19 +187,19 @@ export default class ActiveRelation<T> {
     return (await this.limit(1).toArray())[0]
   }
 
-  proxify (activeRelation: ActiveRelation<any>, basePath: string) {
-    this._proxify = { activeRelation, basePath: activeRelation._proxify.basePath + basePath }
-    this._ioSerialized = activeRelation._ioSerialized
-    this._select = activeRelation._select
-    this._joins = activeRelation._joins
-    this._includes = activeRelation._includes
-    this._where = activeRelation._where
+  proxify (relation: Relation<any>, basePath: string) {
+    this._proxify = { relation, basePath: relation._proxify.basePath + basePath }
+    this._ioSerialized = relation._ioSerialized
+    this._select = relation._select
+    this._joins = relation._joins
+    this._includes = relation._includes
+    this._where = relation._where
     return this
   }
 
-  unproxify () { return this._proxify.activeRelation }
+  unproxify () { return this._proxify.relation }
 
-  or (subqueries: ActiveRelation<any>[]) {
+  or (subqueries: Relation<any>[]) {
     let sql = []
     let bindings = []
 

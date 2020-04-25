@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "outDir": "build/compiled",
-    "target": "es2018",
+    "outDir": "lib",
+    "target": "es6",
     "moduleResolution": "node",
     "module": "commonjs",
     "noImplicitAny": true,
@@ -14,7 +14,6 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "declaration": true,
-    "declarationDir": "build/typings",
     "esModuleInterop": false
   },
   "include": ["src/**/*"]
