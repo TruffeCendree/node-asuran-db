@@ -43,10 +43,11 @@ export interface Field {
 interface ModelOptions {
   className: string
   connection: any
+  parentClass: any
 }
 
-export default function newModel<T> ({ className, connection }: ModelOptions) {
-  return class DBSpecializedModel {
+export default function newModel<T> ({ className, connection, parentClass }: ModelOptions) {
+  return class DBSpecializedModel extends (parentClass || class Object {}) {
     static className = className
     static connection = connection
 
@@ -94,7 +95,9 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       public id: number,
       public editCommitId: number,
       public editDate: number
-    ) {}
+    ) {
+      super()
+    }
 
     // tslint:disable-next-line:no-empty
     static prepareFilterOnSemesterOrders (where: { sql: string, bindings: any[] }, semesterOrders: { start: number, end: number }) {}
@@ -472,14 +475,6 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
 
     static getForeigns () {
       return this.fields.filter(_ => _.foreignKey).map(_ => _.foreignKey).filter(onlyUnique)
-    }
-
-    static buildPolicy (filename: string) {
-      return new (require(`./policies/${filename.split('/').pop().replace('.js', '')}.policy`).default)(this)
-    }
-
-    static buildRelation (filename: string) {
-      return new (require(`./relations/${filename.split('/').pop().replace('.js', '')}.relation`).default)(this)
     }
 
     only (fields: string[]) {

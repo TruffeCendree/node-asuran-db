@@ -51,15 +51,18 @@ export interface Field {
 interface ModelOptions {
     className: string;
     connection: any;
+    parentClass: any;
 }
-export default function newModel<T>({ className, connection }: ModelOptions): {
+export default function newModel<T>({ className, connection, parentClass }: ModelOptions): {
     new (id: number, editCommitId: number, editDate: number): {
+        [x: string]: any;
         id: number;
         editCommitId: number;
         editDate: number;
         only(fields: string[]): any;
         except(fields: string[]): any;
     };
+    [x: string]: any;
     className: string;
     connection: any;
     fields: Field[];
@@ -94,6 +97,7 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
     } & Partial<Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>>)[K_1] extends Function ? never : K_1; }["id" | Exclude<keyof T, "editCommitId" | "editDate" | "jointure">]>[], commitId: number): Promise<any>;
     delete(ids: number[], commitId: number): Promise<any>;
     toObject(body: any, doJointure: boolean, exclude: string[]): {
+        [x: string]: any;
         id: number;
         editCommitId: number;
         editDate: number;
@@ -127,7 +131,5 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
     /** Produit l'expression pour générer un diagramme UML sur dbdiagram.io */
     toDbDiagramIoRef(): string;
     getForeigns(): FieldForeignKey[];
-    buildPolicy(filename: string): any;
-    buildRelation(filename: string): any;
 };
 export {};
