@@ -51,30 +51,20 @@ export interface Field {
 interface ModelOptions {
     className: string;
     connection: any;
-    parentClass: any;
 }
-export default function newModel<T>({ className, connection, parentClass }: ModelOptions): {
+export default function newModel<T>({ className, connection }: ModelOptions): {
     new (id: number, editCommitId: number, editDate: number): {
-        [x: string]: any;
         id: number;
         editCommitId: number;
         editDate: number;
         only(fields: string[]): any;
         except(fields: string[]): any;
     };
-    [x: string]: any;
     className: string;
     connection: any;
     fields: Field[];
     readonly revisionFields: Field[];
     readonly extraDdl: string[];
-    prepareFilterOnSemesterOrders(where: {
-        sql: string;
-        bindings: any[];
-    }, semesterOrders: {
-        start: number;
-        end: number;
-    }): void;
     onCreate(revisionMetadata: RevisionMetadata): Promise<void>;
     onUpdate(revisionMetadata: RevisionMetadata): Promise<void>;
     onDelete(revisionMetadata: RevisionMetadata): Promise<void>;
@@ -97,7 +87,6 @@ export default function newModel<T>({ className, connection, parentClass }: Mode
     } & Partial<Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>>)[K_1] extends Function ? never : K_1; }["id" | Exclude<keyof T, "editCommitId" | "editDate" | "jointure">]>[], commitId: number): Promise<any>;
     delete(ids: number[], commitId: number): Promise<any>;
     toObject(body: any, doJointure: boolean, exclude: string[]): {
-        [x: string]: any;
         id: number;
         editCommitId: number;
         editDate: number;

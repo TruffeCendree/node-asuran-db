@@ -43,11 +43,10 @@ export interface Field {
 interface ModelOptions {
   className: string
   connection: any
-  parentClass: any
 }
 
-export default function newModel<T> ({ className, connection, parentClass }: ModelOptions) {
-  return class DBSpecializedModel extends (parentClass || class Object {}) {
+export default function newModel<T> ({ className, connection }: ModelOptions) {
+  return class DBSpecializedModel {
     static className = className
     static connection = connection
 
@@ -95,12 +94,7 @@ export default function newModel<T> ({ className, connection, parentClass }: Mod
       public id: number,
       public editCommitId: number,
       public editDate: number
-    ) {
-      super()
-    }
-
-    // tslint:disable-next-line:no-empty
-    static prepareFilterOnSemesterOrders (where: { sql: string, bindings: any[] }, semesterOrders: { start: number, end: number }) {}
+    ) {}
 
     // tslint:disable-next-line:no-empty
     static async onCreate (revisionMetadata: RevisionMetadata) {}
