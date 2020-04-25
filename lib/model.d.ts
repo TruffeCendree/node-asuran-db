@@ -27,7 +27,7 @@ export interface IGetAll {
 }
 export interface FieldForeignKey {
     className: string;
-    connection: any;
+    connection: Function;
     fields: Field[];
     toIotsSerializedValidator(exclude: string[]): t.TypeC<any>;
     toObject: (body: any, doJointure: boolean, exclude: string[]) => any;
@@ -50,7 +50,7 @@ export interface Field {
 }
 interface ModelOptions {
     className: string;
-    connection: any;
+    connection: Function;
 }
 export default function newModel<T>({ className, connection }: ModelOptions): {
     new (id: number, editCommitId: number, editDate: number): {
@@ -61,7 +61,7 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
         except(fields: string[]): any;
     };
     className: string;
-    connection: any;
+    connection: Function;
     fields: Field[];
     readonly revisionFields: Field[];
     readonly extraDdl: string[];

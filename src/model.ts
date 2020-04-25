@@ -17,7 +17,7 @@ export interface IGetAll {
 
 export interface FieldForeignKey {
   className: string
-  connection: any
+  connection: Function
   fields: Field[]
   toIotsSerializedValidator (exclude: string[]): t.TypeC<any>
   toObject: (body: any, doJointure: boolean, exclude: string[]) => any
@@ -42,7 +42,7 @@ export interface Field {
 
 interface ModelOptions {
   className: string
-  connection: any
+  connection: Function
 }
 
 export default function newModel<T> ({ className, connection }: ModelOptions) {
@@ -122,7 +122,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
         .reduce((acc, curr) => acc.concat(curr), [])
 
       const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables
-      const [result] = await this.connection.query(sql, bindings)
+      const [result] = await this.connection().query(sql, bindings)
       const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
       await this.onCreate(revisionMetadata)
 
@@ -132,7 +132,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
     }
 
     static async getIdsOfResourcesFromRevisionMetadata ({ insertRevisionId, affectedRows }: RevisionMetadata) {
-      const [rows] = await this.connection.query(
+      const [rows] = await this.connection().query(
         'SELECT id FROM `' + this.className + 'Revision` WHERE revisionId >= ? AND revisionId < ?',
         [ insertRevisionId,insertRevisionId + affectedRows ]
       )
@@ -159,7 +159,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
         .reduce((acc, curr) => acc.concat(curr), [])
 
       const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables + ''
-      const result = await this.connection.query(sql, bindings)
+      const result = await this.connection().query(sql, bindings)
       const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
       await this.onUpdate(revisionMetadata)
       return result
@@ -175,7 +175,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
         .reduce((acc, curr) => acc.concat(curr), [])
 
       const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables
-      const result = await this.connection.query(sql, bindings)
+      const result = await this.connection().query(sql, bindings)
       const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
       await this.onDelete(revisionMetadata)
       return result

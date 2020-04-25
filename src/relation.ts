@@ -105,7 +105,7 @@ export default class Relation<T> {
     const sql = this.toSql()
     this._select = oldSelect
 
-    const [[{ count }]] = await this.baseModel.connection.query(sql, this.toBindings())
+    const [[{ count }]] = await this.baseModel.connection().query(sql, this.toBindings())
     return count
   }
 
@@ -132,7 +132,7 @@ export default class Relation<T> {
 
   async toArray () {
     try {
-      const [rows] = await this.baseModel.connection.query(this.toSql(), this.toBindings()) as any[][]
+      const [rows] = await this.baseModel.connection().query(this.toSql(), this.toBindings()) as any[][]
       ThrowReporter.report(t.array(t.type(this._ioSerialized)).decode(rows))
 
       return rows.map(row => {
