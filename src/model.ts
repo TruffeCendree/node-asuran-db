@@ -20,7 +20,6 @@ export interface FieldForeignKey {
   connection: Function
   fields: Field[]
   toIotsSerializedValidator (exclude: string[]): t.TypeC<any>
-  toObject: (body: any, doJointure: boolean, exclude: string[]) => any
 }
 
 export interface Field {
@@ -37,7 +36,6 @@ export interface Field {
   foreignKeyArray?: boolean
   createBody?: boolean
   updateBody?: boolean
-  autoJoin?: boolean
 }
 
 interface ModelOptions {
@@ -181,29 +179,6 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       return result
     }
 
-    static toObject (body: any, doJointure: boolean, exclude: string[]) {
-      const prefix = this.className[0].toLocaleLowerCase() + this.className.substring(1)
-      const Constructor = this.prototype.constructor as typeof DBSpecializedModel
-      const obj = new Constructor(
-        body[`${prefix}.id`],
-        body[`${prefix}.editCommitId`],
-        body[`${prefix}.editDate`]
-      )
-
-      for (const field of this.fields) {
-        if (exclude.includes(field.name)) continue
-        (obj as any)[field.name] = field.deserialize(body[`${prefix}.${field.name}`])
-
-        if (field.foreignKey && field.autoJoin && doJointure) {
-          if (!(obj as any).jointure) (obj as any).jointure = {}
-          const joinName = field.name.replace('Id', '');
-          (obj as any).jointure[joinName] = field.foreignKey.toObject(body, doJointure, exclude)
-        }
-      }
-
-      return obj
-    }
-
     static prepareField (field: Field) {
       if (typeof field.iotsDeserializedValidator === 'undefined') {
         field.iotsDeserializedValidator = field.iotsSerializedValidator
@@ -218,7 +193,6 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       if (typeof field.foreignKeyArray === 'undefined') field.foreignKeyArray = false
       if (typeof field.createBody === 'undefined') field.createBody = true
       if (typeof field.updateBody === 'undefined') field.updateBody = true
-      if (typeof field.autoJoin === 'undefined') field.autoJoin = false
 
       return field
     }
@@ -247,11 +221,11 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       })
     }
 
-    static registerFieldForeignKey (name: string, foreignKey: FieldForeignKey, { autoJoin, nullable } = { autoJoin: false, nullable: false }) {
+    static registerFieldForeignKey (name: string, foreignKey: FieldForeignKey, nullable= false) {
       if (!foreignKey) throw new Error('foreignKey model cannot be null')
 
       const iotsSerializedValidator = nullable ? t.union([t.null, t.number]) : t.number
-      return this.registerField({ name, type: `int(11) ${nullable ? '' : 'NOT'} NULL`, iotsSerializedValidator, foreignKey, autoJoin })
+      return this.registerField({ name, type: `int(11) ${nullable ? '' : 'NOT'} NULL`, iotsSerializedValidator, foreignKey })
     }
 
     static registerFieldForeignKeyArray (name: string, foreignKey: FieldForeignKey) {

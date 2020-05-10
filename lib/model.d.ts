@@ -30,7 +30,6 @@ export interface FieldForeignKey {
     connection: Function;
     fields: Field[];
     toIotsSerializedValidator(exclude: string[]): t.TypeC<any>;
-    toObject: (body: any, doJointure: boolean, exclude: string[]) => any;
 }
 export interface Field {
     name: string;
@@ -46,7 +45,6 @@ export interface Field {
     foreignKeyArray?: boolean;
     createBody?: boolean;
     updateBody?: boolean;
-    autoJoin?: boolean;
 }
 interface ModelOptions {
     className: string;
@@ -86,21 +84,11 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
         id: number;
     } & Partial<Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>>)[K_1] extends Function ? never : K_1; }["id" | Exclude<keyof T, "editCommitId" | "editDate" | "jointure">]>[], commitId: number): Promise<any>;
     delete(ids: number[], commitId: number): Promise<any>;
-    toObject(body: any, doJointure: boolean, exclude: string[]): {
-        id: number;
-        editCommitId: number;
-        editDate: number;
-        only(fields: string[]): any;
-        except(fields: string[]): any;
-    };
     prepareField(field: Field): Field;
     registerField(field: Field): Field;
     registerFieldBoolean(name: string, nullable?: boolean): Field;
     registerFieldString(name: string, length: number, nullable?: boolean): Field;
-    registerFieldForeignKey(name: string, foreignKey: FieldForeignKey, { autoJoin, nullable }?: {
-        autoJoin: boolean;
-        nullable: boolean;
-    }): Field;
+    registerFieldForeignKey(name: string, foreignKey: FieldForeignKey, nullable?: boolean): Field;
     registerFieldForeignKeyArray(name: string, foreignKey: FieldForeignKey): Field;
     registerFieldInteger(name: string, nullable?: boolean): Field;
     registerFieldDecimal(name: string, length: number, decimals: number, nullable?: boolean): Field;
