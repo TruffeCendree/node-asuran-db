@@ -131,6 +131,8 @@ export default class Relation<T> {
   }
 
   async toArray () {
+    if (this._where.find(_ => _.sql === 'FALSE')) return []
+
     try {
       const [rows] = await this.baseModel.connection().query(this.toSql(), this.toBindings()) as any[][]
       ThrowReporter.report(t.array(t.type(this._ioSerialized)).decode(rows))
