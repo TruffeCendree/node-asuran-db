@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/TruffeCendree/node-asuran-db#readme",
   "dependencies": {
-    "fp-ts": "^2.5.4",
-    "io-ts": "^2.2.2"
+    "fp-ts": "^2.6.5",
+    "io-ts": "^2.2.4"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",
-    "@types/node": "^13.13.5",
+    "@types/node": "^13.13.12",
     "debug": "^4.1.1"
   }
 }

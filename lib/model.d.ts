@@ -2,9 +2,7 @@ import * as t from 'io-ts';
 declare type NeverFunc<T> = Pick<T, {
     [K in keyof T]: T[K] extends Function ? never : K;
 }[keyof T]>;
-export declare type BodyCreate<T> = NeverFunc<{
-    id: never;
-} & Pick<T, Exclude<keyof T, 'editCommitId' | 'editDate' | 'jointure'>>>;
+export declare type BodyCreate<T> = NeverFunc<Pick<T, Exclude<keyof T, 'id' | 'editCommitId' | 'editDate' | 'jointure'>>>;
 export declare type BodyEdit<T> = NeverFunc<{
     id: number;
 } & Partial<Pick<T, Exclude<keyof T, 'editCommitId' | 'editDate' | 'jointure'>>>>;
@@ -66,23 +64,11 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
     onCreate(revisionMetadata: RevisionMetadata): Promise<void>;
     onUpdate(revisionMetadata: RevisionMetadata): Promise<void>;
     onDelete(revisionMetadata: RevisionMetadata): Promise<void>;
-    create(bodies: Pick<{
-        id: never;
-    } & Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>, { [K in keyof ({
-        id: never;
-    } & Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>)]: ({
-        id: never;
-    } & Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>)[K] extends Function ? never : K; }["id" | Exclude<keyof T, "editCommitId" | "editDate" | "jointure">]>[], commitId: number, { getId }?: {
+    create(bodies: BodyCreate<T>[], commitId: number, { getId }?: {
         getId: boolean;
     }): Promise<number[]>;
     getIdsOfResourcesFromRevisionMetadata({ insertRevisionId, affectedRows }: RevisionMetadata): Promise<number[]>;
-    update(bodiesParam: Pick<{
-        id: number;
-    } & Partial<Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>>, { [K_1 in keyof ({
-        id: number;
-    } & Partial<Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>>)]: ({
-        id: number;
-    } & Partial<Pick<T, Exclude<keyof T, "editCommitId" | "editDate" | "jointure">>>)[K_1] extends Function ? never : K_1; }["id" | Exclude<keyof T, "editCommitId" | "editDate" | "jointure">]>[], commitId: number): Promise<any>;
+    update(bodiesParam: BodyEdit<T>[], commitId: number): Promise<any>;
     delete(ids: number[], commitId: number): Promise<any>;
     prepareField(field: Field): Field;
     registerField(field: Field): Field;
@@ -94,7 +80,7 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
     registerFieldDecimal(name: string, length: number, decimals: number, nullable?: boolean): Field;
     registerFieldEnum(name: string, values: string[], nullable?: boolean): Field;
     registerFieldDatetime(name: string, nullable?: boolean): Field;
-    registerFieldJson(name: string, length: number, iotsDeserializedValidator: t.Type<any, any, unknown>): Field;
+    registerFieldJson(name: string, length: number, iotsDeserializedValidator: t.Type<any>): Field;
     registerFieldRegex(name: string, length: number, nullable?: boolean): Field;
     toSqlTables(): string;
     toSqlTriggers(): string;

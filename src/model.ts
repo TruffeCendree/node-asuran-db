@@ -3,7 +3,7 @@ import { ThrowReporter } from 'io-ts/lib/ThrowReporter'
 import { RegexType } from './io-ts-regex'
 
 type NeverFunc<T> = Pick<T, { [K in keyof T]: T[K] extends Function ? never : K }[keyof T]>
-export type BodyCreate<T> = NeverFunc<{ id: never } & Pick<T, Exclude<keyof T, 'editCommitId' | 'editDate' | 'jointure'>>>
+export type BodyCreate<T> = NeverFunc<Pick<T, Exclude<keyof T, 'id' | 'editCommitId' | 'editDate' | 'jointure'>>>
 export type BodyEdit<T> = NeverFunc<{ id: number } & Partial<Pick<T, Exclude<keyof T, 'editCommitId' | 'editDate' | 'jointure'>>>>
 export type BodyPartial<T> = NeverFunc<Partial<Pick<T, Exclude<keyof T, 'id' | 'editCommitId' | 'editDate' | 'jointure'>>>>
 export type RevisionMetadata = { insertRevisionId: number, affectedRows: number }
