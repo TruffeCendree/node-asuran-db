@@ -77,7 +77,9 @@ export default class Relation<T> {
 
   async findMany (ids: number[]) {
     const objects = await this.whereIds(ids).toArray()
-    assert(objects.length === ids.length, `Some ids ${ids.join(', ')} where not resolved.`)
+    const missingIds = ids.filter(id => !objects.find((_: any) => _.id === id))
+    assert(!missingIds.length, `Some ids where not resolved. Missing ids are ${missingIds.join(', ')}.`)
+    assert(objects.length === ids.length, `The returned count differs from query (${objects.length} found, ${ids.length} required).`)
     if (this._order) return objects
 
     // remise des objets dans le bon ordre
