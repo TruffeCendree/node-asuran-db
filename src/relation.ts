@@ -187,6 +187,14 @@ export default class Relation<T> {
     }
   }
 
+  async pluck (columns: string[]): Promise<any[]> {
+    if (this._where.find(_ => _.sql === 'FALSE')) return []
+
+    this._select = columns
+    const [rows] = await this.baseModel.connection().query(this.toSql(), this.toBindings()) as any[][]
+    return rows.map(row => columns.length === 1 ? Object.values(row)[0] : Object.values(row))
+  }
+
   async first () {
     return (await this.limit(1).toArray())[0]
   }

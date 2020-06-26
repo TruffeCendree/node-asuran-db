@@ -30,6 +30,7 @@ export default class Relation<T> {
     toExistsSql(): string;
     toBindings(): any[];
     toArray(): Promise<T[]>;
+    pluck(columns: string[]): Promise<any[]>;
     first(): Promise<T>;
     proxify(relation: Relation<any>, basePath: string): this;
     unproxify(): Relation<any>;
