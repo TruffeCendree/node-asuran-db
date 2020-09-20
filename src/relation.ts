@@ -1,5 +1,5 @@
 import * as t from 'io-ts'
-import { FieldForeignKey } from './model'
+import { FieldForeignKey, registredModels } from './model'
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter'
 import * as assert from 'assert'
 
@@ -73,6 +73,21 @@ export default class Relation<T> {
 
   get none () {
     return this.where('FALSE')
+  }
+
+  get withoutDependant () {
+    for (const className in registredModels) {
+      const onClause = registredModels[className].fields
+        .filter(_ => _.foreignKey === this.baseModel)
+        .map(_ => '`' + className + '`.`' + _.name + '` = `' + this.baseModel.className + '`.`id`')
+        .join(' OR ')
+
+      if (!onClause.length) continue
+      this.joins('LEFT JOIN `' + className + '` ON ' + onClause)
+      this.where('`' + className + '`.`id` IS NULL')
+    }
+
+    return this
   }
 
   async findMany (ids: number[]) {

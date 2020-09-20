@@ -20,6 +20,7 @@ export default class Relation<T> {
     whereNotIds(ids: number[]): this;
     find(id: number): Promise<T>;
     get none(): this;
+    get withoutDependant(): this;
     findMany(ids: number[]): Promise<T[]>;
     group(by: string): this;
     sort(sql: string): this;

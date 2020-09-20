@@ -20,6 +20,7 @@ export interface FieldForeignKey {
   connection: Function
   fields: Field[]
   toIotsSerializedValidator (exclude: string[]): t.TypeC<any>
+  getForeigns: () => FieldForeignKey[]
 }
 
 export interface Field {
@@ -42,6 +43,8 @@ interface ModelOptions {
   className: string
   connection: Function
 }
+
+export const registredModels: { [className: string]: FieldForeignKey } = {}
 
 export default function newModel<T> ({ className, connection }: ModelOptions) {
   return class DBSpecializedModel {
@@ -180,6 +183,8 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
     }
 
     static prepareField (field: Field) {
+      if (this.name === this.className) registredModels[this.name] = this
+
       if (typeof field.iotsDeserializedValidator === 'undefined') {
         field.iotsDeserializedValidator = field.iotsSerializedValidator
       }

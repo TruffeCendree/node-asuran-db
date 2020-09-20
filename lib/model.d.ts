@@ -28,6 +28,7 @@ export interface FieldForeignKey {
     connection: Function;
     fields: Field[];
     toIotsSerializedValidator(exclude: string[]): t.TypeC<any>;
+    getForeigns: () => FieldForeignKey[];
 }
 export interface Field {
     name: string;
@@ -48,6 +49,9 @@ interface ModelOptions {
     className: string;
     connection: Function;
 }
+export declare const registredModels: {
+    [className: string]: FieldForeignKey;
+};
 export default function newModel<T>({ className, connection }: ModelOptions): {
     new (id: number, editCommitId: number, editDate: number): {
         id: number;
