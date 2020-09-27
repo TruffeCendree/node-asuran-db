@@ -191,8 +191,6 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
 
       if (typeof field.sqlGetter === 'undefined') field.sqlGetter = '?'
       if (typeof field.sqlSetter === 'undefined') field.sqlSetter = '?'
-      if (typeof field.serialize === 'undefined') field.serialize = (_: any) => _
-      if (typeof field.deserialize === 'undefined') field.deserialize = (_: any) => _
       if (typeof field.foreignKey === 'undefined') field.foreignKey = null
       if (typeof field.foreignKeyMutator === 'undefined') field.foreignKeyMutator = ''
       if (typeof field.foreignKeyArray === 'undefined') field.foreignKeyArray = false

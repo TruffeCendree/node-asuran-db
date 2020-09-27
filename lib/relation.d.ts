@@ -30,6 +30,16 @@ export default class Relation<T> {
     toSql(): string;
     toExistsSql(): string;
     toBindings(): any[];
+    /**
+     * Same as toArray(), but skip some processing to improve performance.
+     * - skip schema validation using ThrowReporter
+     * - build simpler SQL that only select columns of main table
+     * - skip jointure deserialization
+     * - reduce memory allocations by reusing objets from mysql2 driver
+     */
+    toArrayFast(opts?: {
+        noPrototype?: boolean;
+    }): Promise<T[]>;
     toArray(): Promise<T[]>;
     pluck(columns: string[]): Promise<any[]>;
     first(): Promise<T>;

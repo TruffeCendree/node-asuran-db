@@ -147,6 +147,38 @@ export default class Relation<T> {
       .concat(this._where.map(_ => _.bindings).reduce((acc, curr) => acc.concat(curr), []))
   }
 
+  /**
+   * Same as toArray(), but skip some processing to improve performance.
+   * - skip schema validation using ThrowReporter
+   * - build simpler SQL that only select columns of main table
+   * - skip jointure deserialization
+   * - reduce memory allocations by reusing objets from mysql2 driver
+   */
+  async toArrayFast (opts: { noPrototype?: boolean } = {}) {
+    if (this._where.find(_ => _.sql === 'FALSE')) return []
+
+    try {
+      const oldSelect = this._select
+      // this._select = ['`' + this.baseModel.className + '`.*']
+      this._select = this.baseModel.fields.map(field => field.sqlGetter.replace('?', '`' + this.baseModel.className + '`.`' + field.name + '`') + ' AS `' + field.name + '`')
+      const [rows] = await this.baseModel.connection().query(this.toSql(), this.toBindings()) as any[][]
+      this._select = oldSelect
+
+      const fieldsRequiringDeserialization = this.baseModel.fields.filter(_ => _.deserialize)
+
+      for (const row of rows) {
+        if (!opts.noPrototype) Object.setPrototypeOf(row, (this.baseModel as any).prototype)
+        for (const field of fieldsRequiringDeserialization) row[field.name] = field.deserialize(row[field.name])
+      }
+
+      return rows as T[]
+    } catch (err) {
+      err.sql = this.toSql()
+      err.bindings = this.toBindings()
+      throw err
+    }
+  }
+
   async toArray () {
     if (this._where.find(_ => _.sql === 'FALSE')) return []
 
@@ -163,7 +195,7 @@ export default class Relation<T> {
         )
 
         for (const field of this.baseModel.fields) {
-          object[field.name] = field.deserialize(row[`${this.baseModel.className}.${field.name}`])
+          object[field.name] = field.deserialize ? field.deserialize(row[`${this.baseModel.className}.${field.name}`]) : row[`${this.baseModel.className}.${field.name}`]
         }
 
         object.jointure = {}
@@ -189,7 +221,7 @@ export default class Relation<T> {
           subObject = subObject[path[path.length - 1]]
           subObject.jointure = {}
           for (const field of include.model.fields) {
-            subObject[field.name] = field.deserialize(row[`${include.tableAlias}.${field.name}`])
+            subObject[field.name] = field.deserialize ? field.deserialize(row[`${include.tableAlias}.${field.name}`]) : row[`${include.tableAlias}.${field.name}`]
           }
         }
 
