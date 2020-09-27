@@ -76,15 +76,26 @@ export default class Relation<T> {
   }
 
   get withoutDependant () {
+    // regular foreign keys
     for (const className in registredModels) {
       const onClause = registredModels[className].fields
-        .filter(_ => _.foreignKey === this.baseModel)
+        .filter(_ => _.foreignKey === this.baseModel && !_.foreignKeyArray)
         .map(_ => '`' + className + '`.`' + _.name + '` = `' + this.baseModel.className + '`.`id`')
         .join(' OR ')
 
       if (!onClause.length) continue
       this.joins('LEFT JOIN `' + className + '` ON ' + onClause)
       this.where('`' + className + '`.`id` IS NULL')
+    }
+
+    // foreign arrays
+    for (const className in registredModels) {
+      for (const field of registredModels[className].fields) {
+        if (field.foreignKey === this.baseModel && field.foreignKeyArray) {
+          this.joins('LEFT JOIN `' + className + '_' + field.name + '` ON `' + className + '_' + field.name + '`.`foreignId` = `' + this.baseModel.className + '`.`id`')
+          this.where('`' + className + '_' + field.name + '`.`foreignId` IS NULL')
+        }
+      }
     }
 
     return this
