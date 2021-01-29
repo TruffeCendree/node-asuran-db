@@ -122,14 +122,22 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       const bindings = bodies.map(body => filteredFields.map(f => f.serialize((body as any)[f.name])))
         .reduce((acc, curr) => acc.concat(curr), [])
 
-      const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables
-      const [result] = await this.connection().query(sql, bindings)
-      const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
-      await this.onCreate(revisionMetadata)
-
-      if (!getId) return null
-
-      return this.getIdsOfResourcesFromRevisionMetadata(revisionMetadata)
+      try {
+        const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables
+        const [result] = await this.connection().query(sql, bindings)
+        const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
+        await this.onCreate(revisionMetadata)
+  
+        if (!getId) return null
+  
+        return this.getIdsOfResourcesFromRevisionMetadata(revisionMetadata)
+      } catch (err) {
+        // methods starting with 'onSaveFailed' can throw their own error to explicit validation failure.
+        const failureExplicitor = Object.getOwnPropertyNames(this.prototype).filter(_ => _.startsWith('onSaveFailed'))
+        const instances = failureExplicitor.length ? bodies.map(body => Object.assign(new this(null, (body as any).editCommitId, (body as any).editDate), body as any)) : []
+        for (const instance of instances) for (const method of failureExplicitor) await (instance as any)[method]('create', err)
+        throw err
+      }
     }
 
     static async getIdsOfResourcesFromRevisionMetadata ({ insertRevisionId, affectedRows }: RevisionMetadata) {
@@ -159,11 +167,19 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       const bindings = bodies.map(body => this.fields.map(f => f.serialize(body[f.name])))
         .reduce((acc, curr) => acc.concat(curr), [])
 
-      const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables + ''
-      const result = await this.connection().query(sql, bindings)
-      const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
-      await this.onUpdate(revisionMetadata)
-      return result
+      try {
+        const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables + ''
+        const result = await this.connection().query(sql, bindings)
+        const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
+        await this.onUpdate(revisionMetadata)
+        return result
+      } catch (err) {
+        // methods starting with 'onSaveFailed' can throw their own error to explicit validation failure.
+        const failureExplicitor = Object.getOwnPropertyNames(this.prototype).filter(_ => _.startsWith('onSaveFailed'))
+        const instances = failureExplicitor.length ? bodies.map(body => Object.assign(new this(body.id, body.editCommitId, body.editDate), body as any)) : []
+        for (const instance of instances) for (const method of failureExplicitor) await (instance as any)[method]('update', err)
+        throw err
+      }
     }
 
     static async delete (ids: number[], commitId: number) {
