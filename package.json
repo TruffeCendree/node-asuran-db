@@ -1,6 +1,6 @@
 {
   "name": "node-asuran-db",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "Lightweight ORM supporting revision with user action traceability for Typescript and MariaDB",
   "main": "lib/index.js",
   "scripts": {
