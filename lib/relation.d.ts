@@ -1,6 +1,7 @@
 import { FieldForeignKey } from './model';
 export default class Relation<T> {
     private baseModel;
+    private _connection;
     private _ioSerialized;
     private _select;
     private _joins;
@@ -47,4 +48,5 @@ export default class Relation<T> {
     unproxify(): Relation<any>;
     or(subqueries: Relation<any>[]): this;
     tap(cb: (self: this) => any): this;
+    withConnection(connection: any): this;
 }

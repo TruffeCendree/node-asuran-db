@@ -68,12 +68,13 @@ export default function newModel<T>({ className, connection }: ModelOptions): {
     onCreate(revisionMetadata: RevisionMetadata): Promise<void>;
     onUpdate(revisionMetadata: RevisionMetadata): Promise<void>;
     onDelete(revisionMetadata: RevisionMetadata): Promise<void>;
-    create(bodies: BodyCreate<T>[], commitId: number, { getId }?: {
-        getId: boolean;
+    create(bodies: BodyCreate<T>[], commitId: number, { getId, conn }?: {
+        getId?: boolean;
+        conn?: any;
     }): Promise<number[]>;
-    getIdsOfResourcesFromRevisionMetadata({ insertRevisionId, affectedRows }: RevisionMetadata): Promise<number[]>;
-    update(bodiesParam: BodyEdit<T>[], commitId: number): Promise<any>;
-    delete(ids: number[], commitId: number): Promise<any>;
+    getIdsOfResourcesFromRevisionMetadata({ insertRevisionId, affectedRows }: RevisionMetadata, conn?: any): Promise<number[]>;
+    update(bodiesParam: BodyEdit<T>[], commitId: number, conn?: any): Promise<any>;
+    delete(ids: number[], commitId: number, conn?: any): Promise<any>;
     prepareField(field: Field): Field;
     registerField(field: Field): Field;
     registerFieldBoolean(name: string, nullable?: boolean): Field;

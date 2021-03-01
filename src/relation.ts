@@ -4,6 +4,7 @@ import { ThrowReporter } from 'io-ts/lib/ThrowReporter'
 import * as assert from 'assert'
 
 export default class Relation<T> {
+  private _connection = this.baseModel.connection()
   private _ioSerialized: { [key: string]: t.Type<any, any, unknown> } = {}
   private _select: string[] = []
   private _joins: { sql: string, bindings: any[] }[] = []
@@ -133,7 +134,7 @@ export default class Relation<T> {
     const sql = this.toSql()
     this._select = oldSelect
 
-    const [[{ count }]] = await this.baseModel.connection().query(sql, this.toBindings())
+    const [[{ count }]] = await this._connection.query(sql, this.toBindings())
     return count
   }
 
@@ -172,7 +173,7 @@ export default class Relation<T> {
       const oldSelect = this._select
       // this._select = ['`' + this.baseModel.className + '`.*']
       this._select = this.baseModel.fields.map(field => field.sqlGetter.replace('?', '`' + this.baseModel.className + '`.`' + field.name + '`') + ' AS `' + field.name + '`')
-      const [rows] = await this.baseModel.connection().query(this.toSql(), this.toBindings()) as any[][]
+      const [rows] = await this._connection.query(this.toSql(), this.toBindings()) as any[][]
       this._select = oldSelect
 
       const fieldsRequiringDeserialization = this.baseModel.fields.filter(_ => _.deserialize)
@@ -194,7 +195,7 @@ export default class Relation<T> {
     if (this._where.find(_ => _.sql === 'FALSE')) return []
 
     try {
-      const [rows] = await this.baseModel.connection().query(this.toSql(), this.toBindings()) as any[][]
+      const [rows] = await this._connection.query(this.toSql(), this.toBindings()) as any[][]
       ThrowReporter.report(t.array(t.type(this._ioSerialized)).decode(rows))
 
       return rows.map(row => {
@@ -249,7 +250,7 @@ export default class Relation<T> {
     if (this._where.find(_ => _.sql === 'FALSE')) return []
 
     this._select = columns
-    const [rows] = await this.baseModel.connection().query(this.toSql(), this.toBindings()) as any[][]
+    const [rows] = await this._connection.query(this.toSql(), this.toBindings()) as any[][]
     return rows.map(row => columns.length === 1 ? Object.values(row)[0] : Object.values(row))
   }
 
@@ -284,6 +285,11 @@ export default class Relation<T> {
 
   tap (cb: (self: this) => any) {
     cb(this)
+    return this
+  }
+
+  withConnection (connection: any) {
+    this._connection = connection
     return this
   }
 }
