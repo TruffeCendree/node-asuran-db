@@ -106,7 +106,10 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
     // tslint:disable-next-line:no-empty
     static async onDelete (revisionMetadata: RevisionMetadata) {}
 
-    static async create (bodies: BodyCreate<T>[], commitId: number, { getId }: { getId: boolean } = { getId: false }) {
+    static async create (bodies: BodyCreate<T>[], commitId: number, { getId, conn }: { getId?: boolean, conn?: any } = {}) {
+      getId ||= false
+      conn ||= this.connection()
+
       if (bodies.length === 0) return getId ? [] : null
 
       for (const body of bodies) {
@@ -124,13 +127,13 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
 
       try {
         const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables
-        const [result] = await this.connection().query(sql, bindings)
+        const [result] = await conn.query(sql, bindings)
         const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
         await this.onCreate(revisionMetadata)
   
         if (!getId) return null
   
-        return this.getIdsOfResourcesFromRevisionMetadata(revisionMetadata)
+        return this.getIdsOfResourcesFromRevisionMetadata(revisionMetadata, conn)
       } catch (err) {
         // methods starting with 'onSaveFailed' can throw their own error to explicit validation failure.
         const failureExplicitor = Object.getOwnPropertyNames(this.prototype).filter(_ => _.startsWith('onSaveFailed'))
@@ -140,8 +143,8 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       }
     }
 
-    static async getIdsOfResourcesFromRevisionMetadata ({ insertRevisionId, affectedRows }: RevisionMetadata) {
-      const [rows] = await this.connection().query(
+    static async getIdsOfResourcesFromRevisionMetadata ({ insertRevisionId, affectedRows }: RevisionMetadata, conn = this.connection()) {
+      const [rows] = await conn.query(
         'SELECT id FROM `' + this.className + 'Revision` WHERE revisionId >= ? AND revisionId < ?',
         [ insertRevisionId,insertRevisionId + affectedRows ]
       )
@@ -149,7 +152,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       return rows.map((_: DBSpecializedModel) => _.id) as number[]
     }
 
-    static async update (bodiesParam: BodyEdit<T>[], commitId: number) {
+    static async update (bodiesParam: BodyEdit<T>[], commitId: number, conn = this.connection()) {
       if (bodiesParam.length === 0) return null
 
       const bodies = await Promise.all(bodiesParam.map(async bodyParam => {
@@ -169,7 +172,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
 
       try {
         const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables + ''
-        const result = await this.connection().query(sql, bindings)
+        const result = await conn.query(sql, bindings)
         const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
         await this.onUpdate(revisionMetadata)
         return result
@@ -182,7 +185,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
       }
     }
 
-    static async delete (ids: number[], commitId: number) {
+    static async delete (ids: number[], commitId: number, conn = this.connection()) {
       if (ids.length === 0) return null
 
       const bodies = await (this as any).q.findMany(ids) as T[]
@@ -192,7 +195,7 @@ export default function newModel<T> ({ className, connection }: ModelOptions) {
         .reduce((acc, curr) => acc.concat(curr), [])
 
       const sql = 'INSERT INTO `' + this.className + 'Revision` (' + fields + ') VALUES ' + variables
-      const result = await this.connection().query(sql, bindings)
+      const result = await conn.query(sql, bindings)
       const revisionMetadata = { insertRevisionId: result.insertId, affectedRows: result.affectedRows }
       await this.onDelete(revisionMetadata)
       return result
